@@ -361,35 +361,66 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // JavaScript pour remplir les modales de modification et suppression de catégorie
-        var editCategoryModal = document.getElementById('editCategoryModal');
-        editCategoryModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var id = button.getAttribute('data-id');
-            var name = button.getAttribute('data-name');
-            var description = button.getAttribute('data-description');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion de la modale d'édition
+            var editCategoryModal = document.getElementById('editCategoryModal');
+            if (editCategoryModal) {
+                editCategoryModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var id = button.getAttribute('data-id');
+                    var name = button.getAttribute('data-name');
+                    var description = button.getAttribute('data-description');
 
-            var modalTitle = editCategoryModal.querySelector('.modal-title');
-            var modalIdInput = editCategoryModal.querySelector('#editCategoryId');
-            var modalNameInput = editCategoryModal.querySelector('#editCategoryName');
-            var modalDescriptionTextarea = editCategoryModal.querySelector('#editCategoryDescription');
+                    var modalTitle = editCategoryModal.querySelector('.modal-title');
+                    var modalIdInput = editCategoryModal.querySelector('#editCategoryId');
+                    var modalNameInput = editCategoryModal.querySelector('#editCategoryName');
+                    var modalDescriptionTextarea = editCategoryModal.querySelector('#editCategoryDescription');
 
-            modalTitle.textContent = 'Modifier la catégorie : ' + name;
-            modalIdInput.value = id;
-            modalNameInput.value = name;
-            modalDescriptionTextarea.value = description;
-        });
+                    modalTitle.textContent = 'Modifier la catégorie : ' + name;
+                    modalIdInput.value = id;
+                    modalNameInput.value = name;
+                    modalDescriptionTextarea.value = description;
+                });
+            }
 
-        var deleteCategoryModal = document.getElementById('deleteCategoryModal');
-        deleteCategoryModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var id = button.getAttribute('data-id');
-            var name = button.getAttribute('data-name');
+            // Gestion de la modale de suppression
+            var deleteCategoryModal = document.getElementById('deleteCategoryModal');
+            if (deleteCategoryModal) {
+                deleteCategoryModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var id = button.getAttribute('data-id');
+                    var name = button.getAttribute('data-name');
 
-            var modalBody = deleteCategoryModal.querySelector('.modal-body strong');
-            var modalIdInput = deleteCategoryModal.querySelector('#deleteCategoryId');
+                    var modalBody = deleteCategoryModal.querySelector('.modal-body strong');
+                    var modalIdInput = deleteCategoryModal.querySelector('#deleteCategoryId');
 
-            modalBody.textContent = name;
-            modalIdInput.value = id;
+                    modalBody.textContent = name;
+                    modalIdInput.value = id;
+                });
+            }
+
+            // Validation des formulaires
+            var editForm = document.querySelector('#editCategoryModal form');
+            if (editForm) {
+                editForm.addEventListener('submit', function(event) {
+                    var nameInput = this.querySelector('#editCategoryName');
+                    if (!nameInput.value.trim()) {
+                        event.preventDefault();
+                        alert('Le nom de la catégorie est requis.');
+                    }
+                });
+            }
+
+            var addForm = document.querySelector('#addCategoryModal form');
+            if (addForm) {
+                addForm.addEventListener('submit', function(event) {
+                    var nameInput = this.querySelector('#categoryName');
+                    if (!nameInput.value.trim()) {
+                        event.preventDefault();
+                        alert('Le nom de la catégorie est requis.');
+                    }
+                });
+            }
         });
     </script>
 </body>

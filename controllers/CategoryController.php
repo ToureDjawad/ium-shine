@@ -71,7 +71,7 @@ class CategoryController {
             
             if (empty($name)) {
                 $_SESSION['error'] = "Le nom de la catégorie est requis.";
-                header('Location: admin.php?route=add_category');
+                header('Location: admin.php?route=settings');
                 exit;
             }
             
@@ -80,27 +80,34 @@ class CategoryController {
             
             if ($stmt->execute([$name, $description])) {
                 $_SESSION['success'] = "Catégorie ajoutée avec succès.";
-                header('Location: admin.php?route=dashboard');
             } else {
                 $_SESSION['error'] = "Erreur lors de l'ajout de la catégorie.";
-                header('Location: admin.php?route=add_category');
             }
+            header('Location: admin.php?route=settings');
             exit;
         }
-        
-        include 'views/admin/categories/form.php';
     }
     
     public function edit() {
-        $id = $_GET['id'] ?? 0;
-        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['id'] ?? 0;
             $name = $_POST['name'] ?? '';
             $description = $_POST['description'] ?? '';
             
             if (empty($name)) {
                 $_SESSION['error'] = "Le nom de la catégorie est requis.";
-                header('Location: admin.php?route=edit_category&id=' . $id);
+                header('Location: admin.php?route=settings');
+                exit;
+            }
+            
+            // Vérifier si la catégorie existe
+            $checkQuery = "SELECT id FROM categories WHERE id = ?";
+            $checkStmt = $this->db->prepare($checkQuery);
+            $checkStmt->execute([$id]);
+            
+            if (!$checkStmt->fetch()) {
+                $_SESSION['error'] = "Catégorie non trouvée.";
+                header('Location: admin.php?route=settings');
                 exit;
             }
             
@@ -109,54 +116,42 @@ class CategoryController {
             
             if ($stmt->execute([$name, $description, $id])) {
                 $_SESSION['success'] = "Catégorie mise à jour avec succès.";
-                header('Location: admin.php?route=dashboard');
             } else {
                 $_SESSION['error'] = "Erreur lors de la mise à jour de la catégorie.";
-                header('Location: admin.php?route=edit_category&id=' . $id);
             }
+            header('Location: admin.php?route=settings');
             exit;
         }
-        
-        $query = "SELECT * FROM categories WHERE id = ?";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([$id]);
-        $category = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$category) {
-            $_SESSION['error'] = "Catégorie non trouvée.";
-            header('Location: admin.php?route=dashboard');
-            exit;
-        }
-        
-        include 'views/admin/categories/form.php';
     }
     
     public function delete() {
-        $id = $_GET['id'] ?? 0;
-        
-        // Vérifier s'il y a des candidats dans cette catégorie
-        $query = "SELECT COUNT(*) as count FROM candidates WHERE category_id = ?";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([$id]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($result['count'] > 0) {
-            $_SESSION['error'] = "Impossible de supprimer cette catégorie car elle contient des candidats.";
-            header('Location: admin.php?route=dashboard');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['id'] ?? 0;
+            
+            // Vérifier s'il y a des candidats dans cette catégorie
+            $query = "SELECT COUNT(*) as count FROM candidates WHERE category_id = ?";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([$id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($result['count'] > 0) {
+                $_SESSION['error'] = "Impossible de supprimer cette catégorie car elle contient des candidats.";
+                header('Location: admin.php?route=settings');
+                exit;
+            }
+            
+            $query = "DELETE FROM categories WHERE id = ?";
+            $stmt = $this->db->prepare($query);
+            
+            if ($stmt->execute([$id])) {
+                $_SESSION['success'] = "Catégorie supprimée avec succès.";
+            } else {
+                $_SESSION['error'] = "Erreur lors de la suppression de la catégorie.";
+            }
+            
+            header('Location: admin.php?route=settings');
             exit;
         }
-        
-        $query = "DELETE FROM categories WHERE id = ?";
-        $stmt = $this->db->prepare($query);
-        
-        if ($stmt->execute([$id])) {
-            $_SESSION['success'] = "Catégorie supprimée avec succès.";
-        } else {
-            $_SESSION['error'] = "Erreur lors de la suppression de la catégorie.";
-        }
-        
-        header('Location: admin.php?route=dashboard');
-        exit;
     }
 }
 ?> 
